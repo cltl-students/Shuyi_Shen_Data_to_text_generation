@@ -72,6 +72,7 @@ class BertForRE(BertPreTrainedModel):
     def masked_avgpool(sent, mask):
         mask_ = mask.masked_fill(mask == 0, -1e9).float()
         score = torch.softmax(mask_, -1)
+        # [b, 1, l] [b, l, h] -> [b, 1, h]
         return torch.matmul(score.unsqueeze(1), sent).squeeze(1)
 
     def forward(
@@ -116,8 +117,8 @@ class BertForRE(BertPreTrainedModel):
         # before fuse relation representation
         if ensure_corres:
             # for every position $i$ in sequence, should concate $j$ to predict.
-            sub_extend = sequence_output.unsqueeze(2).expand(-1, -1, seq_len, -1)  # (bs, s, s, h)
-            obj_extend = sequence_output.unsqueeze(1).expand(-1, seq_len, -1, -1)  # (bs, s, s, h)
+            sub_extend = sequence_output.unsqueeze(2).expand(-1, -1, seq_len, -1)  # (bs, l, l, h)
+            obj_extend = sequence_output.unsqueeze(1).expand(-1, seq_len, -1, -1)  # (bs, l, l, h)
             # batch x seq_len x seq_len x 2*hidden
             corres_pred = torch.cat([sub_extend, obj_extend], 3)
             # (bs, seq_len, seq_len)

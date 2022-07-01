@@ -9,7 +9,7 @@ import torch
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, Dataset
 from transformers import BertTokenizer
 
-from dataloader_utils import read_examples, convert_examples_to_features
+from dataloader_utils import read_examples, convert_examples_to_features, read_raw_examples
 
 
 class FeatureDataset(Dataset):
@@ -71,6 +71,20 @@ class CustomDataLoader(object):
         input_tokens = [f.input_tokens for f in features]
         tensors = [input_ids, attention_mask, triples, input_tokens]
         return tensors
+    
+    @staticmethod
+    def collate_fn_infer(features):
+        """将InputFeatures转换为Tensor
+        Args:
+            features (List[InputFeatures])
+        Returns:
+            tensors (List[Tensors])
+        """
+        input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
+        attention_mask = torch.tensor([f.attention_mask for f in features], dtype=torch.long)
+        input_tokens = [f.input_tokens for f in features]
+        tensors = [input_ids, attention_mask, input_tokens]
+        return tensors
 
     def get_features(self, data_sign, ex_params):
         """convert InputExamples to InputFeatures
@@ -87,8 +101,11 @@ class CustomDataLoader(object):
             with open(self.data_dir / f'rel2id.json', 'r', encoding='utf-8') as f_re:
                 rel2idx = json.load(f_re)[-1]
             # get examples
-            if data_sign in ("train", "val", "test", "pseudo", 'EPO', 'SEO', 'SOO', 'Normal', '1', '2', '3', '4', '5'):
+            if data_sign in ("train", "val", "temp", "test", "pseudo", 'EPO', 'SEO', 'SOO', 'Normal', '1', '2', '3', '4', '5'):
                 examples = read_examples(self.data_dir, data_sign=data_sign, rel2idx=rel2idx)
+
+            elif data_sign == "inference":
+                examples = read_raw_examples(self.data_dir, data_sign=data_sign, rel2idx=rel2idx)
             else:
                 raise ValueError("please notice that the data can only be train/val/test!!")
             features = convert_examples_to_features(self.params, examples, self.tokenizer, rel2idx, data_sign,
@@ -113,6 +130,11 @@ class CustomDataLoader(object):
             datasampler = RandomSampler(dataset)
             dataloader = DataLoader(dataset, sampler=datasampler, batch_size=self.train_batch_size,
                                     collate_fn=self.collate_fn_train)
+
+        elif data_sign == "temp":
+           datasampler = RandomSampler(dataset)
+           dataloader = DataLoader(dataset, sampler=datasampler, batch_size=self.val_batch_size,
+                                    collate_fn=self.collate_fn_train)
         elif data_sign == "val":
             datasampler = SequentialSampler(dataset)
             dataloader = DataLoader(dataset, sampler=datasampler, batch_size=self.val_batch_size,
@@ -121,6 +143,10 @@ class CustomDataLoader(object):
             datasampler = SequentialSampler(dataset)
             dataloader = DataLoader(dataset, sampler=datasampler, batch_size=self.test_batch_size,
                                     collate_fn=self.collate_fn_test)
+        elif data_sign == "inference":
+            datasampler = SequentialSampler(dataset)
+            dataloader = DataLoader(dataset, sampler=datasampler, batch_size=1,
+                                    collate_fn=self.collate_fn_infer)
         else:
             raise ValueError("please notice that the data can only be train/val/test !!")
         return dataloader
@@ -129,7 +155,7 @@ class CustomDataLoader(object):
 if __name__ == '__main__':
     from utils import Params
 
-    params = Params(corpus_type='WebNLG')
+    params = Params(corpus_type='Job')
     ex_params = {
         'ensure_relpre': True
     }

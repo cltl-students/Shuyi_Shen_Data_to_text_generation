@@ -14,23 +14,24 @@ Label2IdxObj = {"B-T": 1, "I-T": 2, "O": 0}
 
 
 class Params:
-    """参数定义
+    """Define the parameter
     """
 
-    def __init__(self, ex_index=1, corpus_type='NYT'):
+    def __init__(self, ex_index=1, corpus_type='Job'):
         self.root_path = Path(os.path.abspath(os.path.dirname(__file__)))
         self.data_dir = self.root_path / f'data/{corpus_type}'
         self.ex_dir = self.root_path / f'experiments/ex{ex_index}'
         self.model_dir = self.root_path / f'model/ex{ex_index}'
-        self.bert_model_dir = self.root_path / 'pretrain_models/bert_base_cased'
+        self.bert_model_dir = self.root_path / 'pretrain_models/bert-base-cased'
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.n_gpu = torch.cuda.device_count()
         self.max_seq_length = 100
         self.data_cache = False
-        self.train_batch_size = 6 if 'WebNLG' in corpus_type else 64
-        self.val_batch_size = 24
-        self.test_batch_size = 64
+        # self.train_batch_size = 6 if 'WebNLG' in corpus_type else 64
+        self.train_batch_size = 4
+        self.val_batch_size = 4
+        self.test_batch_size = 4
         # PRST parameters
         self.seq_tag_size = len(Label2IdxSub)
         # load label2id
@@ -43,13 +44,13 @@ class Params:
         self.patience_num = 20
 
         # learning rate
-        self.fin_tuning_lr = 1e-4
+        self.fin_tuning_lr = 1e-5
         self.downs_en_lr = 1e-3
         self.clip_grad = 2.
         self.drop_prob = 0.3  # dropout
         self.weight_decay_rate = 0.01
         self.warmup_prop = 0.1
-        self.gradient_accumulation_steps = 2
+        self.gradient_accumulation_steps = 1
 
     def load(self, json_path):
         """Loads parameters from json file"""
@@ -58,7 +59,7 @@ class Params:
             self.__dict__.update(params)
 
     def save(self, json_path):
-        """保存配置到json文件
+        """save the configuration to the json file
         """
         params = {}
         with open(json_path, 'w') as f:

@@ -1,0 +1,22 @@
+('Experience', 'JavaScript frameworks ( ideally Vue . js and Nuxt . js )', 3)
+('Minimum 3 years of professional experience', 'Angular framework ( up to v8 )', 3)
+('Experience', 'agile methodologies', 3)
+------Correct relation------
+('Experience', 'JavaScript frameworks ( ideally Vue . js and Nuxt . js )', 3)
+('Experience', 'testing frameworks ( Selenium , Jest , Mocha , Chai )', 3)
+('Experience', 'testing frameworks', 3)
+('Working experience', 'software development tools and practices', 3)
+('Minimum 3 years of professional experience', 'Angular framework ( up to v8 )', 3)
+('Experience', 'agile methodologies', 3)
+------predicted relation------
+('Experience', 'both mobile and desktop first methodologies', 3)
+('Experience', 'cloud platform ( Azure )', 3)
+('Experience', 'JavaScript frameworks ( ideally Vue . js and Nuxt . js )', 3)
+('Experience', 'software development in a regulated industry ( such as medical , automotive , nuclear or defense )', 3)
+('Extensive experience', 'tax', 3)
+('Extensive experience', 'accounting', 3)
+('Extensive experience', 'data analysis', 3)
+('Working experience', 'software development tools and practices ( Agile )', 3)
+('Minimum 3 years of professional experience', 'Angular framework ( up to v8 )', 3)
+('Experience', 'agile methodologies', 3)
+------gold relation------

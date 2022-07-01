@@ -72,6 +72,26 @@ def read_examples(data_dir, data_sign, rel2idx):
     return examples
 
 
+def read_raw_examples(data_dir, data_sign, rel2idx):
+    """load data to InputExamples
+    """
+    examples = []
+
+    # read src data
+    with open(data_dir / 'raw_data_per.json', "r", encoding='utf-8') as f:
+        data = json.load(f)
+        for sample in data:
+            text = sample['text']
+            rel2ens = defaultdict(list)
+            en_pair_list = []
+            re_list = []
+
+            example = InputExample(text=text, en_pair_list=en_pair_list, re_list=re_list, rel2ens=rel2ens)
+            examples.append(example)
+    print("InputExamples:", len(examples))
+    return examples
+
+
 def find_head_idx(source, target):
     target_len = len(target)
     for i in range(len(source)):
@@ -114,7 +134,8 @@ def convert(example, max_text_len, tokenizer, rel2idx, data_sign, ex_params):
         attention_mask += [0] * pad_len
 
     # train data
-    if data_sign == 'train':
+    # 
+    if data_sign == 'train' or data_sign =="temp":
         # construct tags of correspondence and relation
         corres_tag = np.zeros((max_text_len, max_text_len))
         rel_tag = len(rel2idx) * [0]
